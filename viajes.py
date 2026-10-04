@@ -18,6 +18,7 @@ import hashlib
 import re
 import secrets
 import sqlite3
+import unicodedata
 from abc import ABC, abstractmethod
 from contextlib import contextmanager
 from datetime import date
@@ -25,6 +26,7 @@ from datetime import date
 # Formatos aceptados (RNF-07)
 PATRON_CORREO = re.compile(r"^[^@\s]+@[^@\s]+\.[a-zA-Z]{2,}$")
 PATRON_TELEFONO = re.compile(r"^\+?\d{8,12}$")
+PATRON_NOMBRE = re.compile(r"^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ' -]{2,60}$")   # H1: solo letras
 LARGO_MINIMO_CLAVE = 8          # RNF-03
 
 
@@ -43,6 +45,9 @@ class Usuario(ABC):
         correo = (correo or "").strip().lower()
         if not nombre:
             raise ValueError("El nombre es obligatorio.")
+        if not PATRON_NOMBRE.match(nombre):
+            # H1 (auditoría): antes se aceptaba "12345678" como nombre
+            raise ValueError("El nombre solo puede tener letras y espacios (2 a 60 caracteres).")
         if not PATRON_CORREO.match(correo):
             raise ValueError("El correo no tiene un formato válido.")
         self.id = id
@@ -159,6 +164,13 @@ class Destino:
             raise ValueError("La duración debe ser de al menos 1 día.")
         if not isinstance(self.costo_base, int) or self.costo_base <= 0:
             raise ValueError("El costo base debe ser mayor que cero.")
+
+    @staticmethod
+    def normalizar(nombre):
+        """H2 (auditoría): 'Cajón  del Maipo' y 'cajon del maipo' son el mismo destino."""
+        sin_tildes = unicodedata.normalize("NFD", nombre or "")
+        sin_tildes = "".join(c for c in sin_tildes if unicodedata.category(c) != "Mn")
+        return " ".join(sin_tildes.lower().split())
 
     def marcar_no_disponible(self):
         """R8: deja de ofrecerse para paquetes nuevos, pero no se borra."""
@@ -413,6 +425,7 @@ class SistemaViajes:
         destino = Destino(nombre, zona, desc, dias, costo)
         try:
             with self._bd.conectar() as con:
+                self._exigir_nombre_libre(con, destino.nombre)
                 cur = con.execute(
                     "INSERT INTO destinos (nombre, zona, descripcion, duracion_dias, costo_base) "
                     "VALUES (?, ?, ?, ?, ?)",
@@ -429,6 +442,7 @@ class SistemaViajes:
         destino = Destino(nombre, zona, desc, dias, costo, actual.disponible, id)
         try:
             with self._bd.conectar() as con:
+                self._exigir_nombre_libre(con, destino.nombre, id)
                 con.execute(
                     "UPDATE destinos SET nombre = ?, zona = ?, descripcion = ?, duracion_dias = ?, "
                     "costo_base = ? WHERE id = ?",
@@ -548,6 +562,13 @@ class SistemaViajes:
             con.execute("UPDATE reservas SET estado = ? WHERE id = ?", (reserva.estado, reserva.id))
 
     # ------------------------------------------------- apoyo interno
+    def _exigir_nombre_libre(self, con, nombre, id_propio=None):
+        """H2: compara nombres sin tildes, mayúsculas ni espacios dobles (P1: destinos duplicados)."""
+        clave = Destino.normalizar(nombre)
+        for id_existente, nombre_existente in con.execute("SELECT id, nombre FROM destinos"):
+            if id_existente != id_propio and Destino.normalizar(nombre_existente) == clave:
+                raise ValueError(f"Ya existe un destino con ese nombre: {nombre_existente}.")
+
     def _buscar_destino(self, id):
         with self._bd.conectar() as con:
             fila = con.execute(
@@ -631,6 +652,10 @@ def _pruebas():
     assert falla_con(ValueError, s.registrar_cliente, "Otra", "11111111-1", "CAROLINA@correo.cl", "912345678", "Clave2026x")
     ok("RF-01 registro con RUT válido, correo único y clave mínima")
 
+    # H1 (auditoría): el nombre no puede ser solo números
+    assert falla_con(ValueError, s.registrar_cliente, "12345678", "22222222-2", "num@x.cl", "912345678", "Clave2026x")
+    ok("H1 un nombre con solo números se rechaza")
+
     # RF-02 + RNF-01 + RNF-02 + RNF-03 + RNF-09
     with s._bd.conectar() as con:
         h1 = con.execute("SELECT hash_clave FROM usuarios WHERE correo='carolina@correo.cl'").fetchone()[0]
@@ -659,6 +684,11 @@ def _pruebas():
     assert falla_con(ValueError, s.registrar_destino, "cajón del maipo", "RM", "Repetido", 1, 1000)
     assert falla_con(ValueError, s.registrar_destino, "Gratis", "RM", "Costo cero", 1, 0)
     ok("RF-05 destino con nombre único y costo > 0")
+
+    # H2 (auditoría): sin tilde o con espacios dobles sigue siendo el mismo destino (P1)
+    assert falla_con(ValueError, s.registrar_destino, "Cajon del Maipo", "RM", "Sin tilde", 1, 1000)
+    assert falla_con(ValueError, s.registrar_destino, "ISLA  DAMAS", "Coquimbo", "Espacios", 1, 1000)
+    ok("H2 'Cajon' y 'Cajón' se detectan como el mismo destino")
 
     # RF-09/10 + R3, R5, R6
     salida, regreso = hoy + timedelta(days=30), hoy + timedelta(days=32)

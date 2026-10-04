@@ -11,7 +11,7 @@ import sqlite3
 from datetime import datetime
 from getpass import getpass
 
-from viajes import SistemaViajes
+from viajes import Cliente, SistemaViajes
 
 
 # ---------------------------------------------------------------- entrada de datos (capa 1)
@@ -41,6 +41,15 @@ def pedir_fecha(mensaje):
             print("  ✗ Use el formato dd-mm-aaaa (ejemplo: 15-12-2026).")
 
 
+def pedir_rut(mensaje="RUT (12345678-5): "):
+    """H3 (auditoría): el RUT se revisa apenas se escribe, no al final del registro."""
+    while True:
+        rut = pedir_texto(mensaje)
+        if Cliente.validar_rut(rut):
+            return rut
+        print("  ✗ RUT inválido: revise el dígito verificador (ejemplo: 12345678-5).")
+
+
 def pedir_clave(mensaje="Contraseña: "):
     return getpass(mensaje)          # no se ve en pantalla mientras se escribe
 
@@ -65,7 +74,7 @@ def crear_primer_admin(sistema):
 def registrarse(sistema):
     print("\n— Registro de cliente —")
     nombre = pedir_texto("Nombre completo: ")
-    rut = pedir_texto("RUT (12345678-5): ")
+    rut = pedir_rut()
     correo = pedir_texto("Correo: ")
     telefono = pedir_texto("Teléfono: ")
     clave = pedir_clave("Contraseña (mínimo 8 caracteres): ")
