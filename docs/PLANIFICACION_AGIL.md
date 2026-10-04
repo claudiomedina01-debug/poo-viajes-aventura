@@ -50,9 +50,9 @@ Sprints cortos (1 a 2 días) porque el plazo total es de 6 días. Cada sprint te
 |---|---|---|---|---|---|
 | **0 · Análisis** | 30 sep – 1 oct | Entender el caso y definir qué construir | Leer pauta y rúbrica · crear repositorio · requerimientos, supuestos y prioridad | Repositorio + `docs/REQUERIMIENTOS.md` | ✅ Terminado |
 | **1 · Diseño** | 1 – 2 oct | Modelar la solución | Casos de uso · BPMN reservar y armar paquete · diagrama de clases · trazabilidad · esta planificación | `diagramas/` + `docs/TRAZABILIDAD.md` + `docs/PLANIFICACION_AGIL.md` | ✅ Terminado |
-| **2 · Catálogo** | 2 – 3 oct | Construir la base y el lado del administrador | Base de datos SQLite · HU-01, HU-04, HU-05, HU-06, HU-07, HU-12 | `viajes.py` (clases + BD + CRUD) · `main.py` (menú admin) | Pendiente |
-| **3 · Clientes y seguridad** | 3 – 4 oct | Construir el lado del cliente y asegurar el sistema | HU-02, HU-03, HU-08, HU-09, HU-10, HU-11, HU-13 | Login seguro · reservas · `docs/AUDITORIA.md` · `docs/SALIDA_TERMINAL.md` · `docs/ANALISIS_IA.md` | Pendiente |
-| **4 · Cierre** | 4 – 5 oct | Entregar y preparar la defensa | README final · informe Word (plantilla INACAP) · revisión contra la rúbrica · guion de defensa | Informe + repositorio subidos al AAI **antes de las 23:00** | Pendiente |
+| **2 · Catálogo** | 2 – 3 oct | Construir la base y el lado del administrador | Base de datos SQLite · HU-01, HU-04, HU-05, HU-06, HU-07, HU-12 | `viajes.py` (clases + BD + CRUD) · `main.py` (menú admin) | ✅ Terminado |
+| **3 · Clientes y seguridad** | 3 – 4 oct | Construir el lado del cliente y asegurar el sistema | HU-02, HU-03, HU-08, HU-09, HU-10, HU-11, HU-13 | Login seguro · reservas · `docs/AUDITORIA.md` · `docs/SALIDA_TERMINAL.md` · `docs/ANALISIS_IA.md` | ✅ Terminado |
+| **4 · Cierre** | 4 – 5 oct | Entregar y preparar la defensa | README final · informe Word (plantilla INACAP) · revisión contra la rúbrica · guion de defensa | Informe + repositorio subidos al AAI **antes de las 23:00** | En curso |
 
 **Puntos por sprint:** Sprint 2 = 16 puntos (HU-01 2 + HU-04 3 + HU-05 2 + HU-06 1 + HU-07 5 + HU-12 3) · Sprint 3 = 23 puntos (HU-02 5 + HU-03 3 + HU-08 3 + HU-09 5 + HU-10 2 + HU-11 2 + HU-13 3).
 
@@ -81,6 +81,8 @@ Una historia está terminada solo si:
 |---|---|---|---|
 | 0 · Análisis | Reusar la estructura del proyecto EcoTech ahorró tiempo; los supuestos quedaron justificados | Al subir por arrastre, GitHub omitió los archivos que empiezan con punto (`.gitignore`, `.env.example`) | Revisar la lista de archivos antes de cada commit |
 | 1 · Diseño | La trazabilidad confirmó que no faltaba ningún requerimiento | Una subida quedó en la carpeta equivocada (`historico`) y la traducción automática del navegador cambió nombres de carpetas | Revisar la ruta antes de confirmar y desactivar la traducción en GitHub |
+| 2 · Catálogo | Las 13 pruebas automáticas detectaron un error real (el bloqueo no guardaba los intentos fallidos) antes de la demostración | Al programar cambiaron métodos y el diagrama de clases quedó desactualizado | Actualizar el diagrama junto con el código y guardar la versión anterior en `historico` |
+| 3 · Clientes y seguridad | La demostración manual encontró 3 hallazgos (H1–H3) que las pruebas no veían; se corrigieron y se comprobaron (15 de 15) | Varias copias de un mismo archivo en Descargas ("(1)", "2") causaron confusión al actualizar | Renombrar el archivo viejo y moverlo a `_revisar_para_borrar` antes de copiar el nuevo |
 
 ## 7. Cronograma de entregables
 
