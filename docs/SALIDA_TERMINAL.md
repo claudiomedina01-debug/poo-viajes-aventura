@@ -6,7 +6,7 @@ Cada bloque indica qué requerimiento y qué indicador de la rúbrica demuestra.
 - Equipo: Windows 11 · Python 3.13 · SQLite (librería estándar)
 - Carpeta de trabajo: `04_Codigo` (la ruta personal del equipo se reemplazó por `...`)
 
-## 1. Pruebas automáticas — `python viajes.py`
+## 1. Pruebas automáticas — `python viajes.py` (3 de octubre de 2026, después del Paso 6)
 
 Indicadores: **4.1.4.G.13** (código respeta el UML), **4.1.4.G.14** (persistencia), **4.1.4.G.15** (CRUD), **4.1.5.G.17/18** (autenticación).
 
@@ -14,9 +14,11 @@ Indicadores: **4.1.4.G.13** (código respeta el UML), **4.1.4.G.14** (persistenc
 Pruebas de viajes.py
   OK  RF-04 primer administrador (y solo uno)
   OK  RF-01 registro con RUT válido, correo único y clave mínima
+  OK  H1 un nombre con solo números se rechaza
   OK  RNF-01/02/03/09 hash, bloqueo a los 3 intentos, mensaje genérico, inyección SQL
   OK  RNF-04 un cliente no puede gestionar el catálogo; sin sesión no hay historial
   OK  RF-05 destino con nombre único y costo > 0
+  OK  H2 'Cajon' y 'Cajón' se detectan como el mismo destino
   OK  RF-09/10 paquete de 2 a 5 destinos; precio 83.000 + 20 % = 99.600
   OK  RF-06 / R7 modificar un costo no cambia el precio ya publicado
   OK  RF-07 / R8 eliminar si no está en paquetes; si está, queda no disponible
@@ -26,10 +28,10 @@ Pruebas de viajes.py
   OK  R17 RUT y teléfono enmascarados
   OK  RNF-08 la base rechaza un costo negativo (CHECK)
 
-TODAS LAS PRUEBAS OK (13 de 13)
+TODAS LAS PRUEBAS OK (15 de 15)
 ```
 
-Cada línea "OK" prueba una regla del caso (R) o un requerimiento (RF/RNF). Las pruebas usan una base de datos temporal, así que no ensucian la base real.
+Cada línea "OK" prueba una regla del caso (R), un requerimiento (RF/RNF) o la corrección de un hallazgo (H). Antes del Paso 6 eran 13 pruebas; se agregaron 2 para H1 y H2. Las pruebas usan una base de datos temporal, así que no ensucian la base real.
 
 ## 2. Demostración manual — `python main.py` (2 de octubre de 2026)
 
@@ -233,13 +235,13 @@ PS ...\04_Codigo>
 
 ## 3. Hallazgos detectados durante la demostración
 
-Probar el sistema como lo usaría una persona real reveló detalles que las pruebas automáticas no cubrían. Se registran en `docs/AUDITORIA.md` para corregirlos:
+Probar el sistema como lo usaría una persona real reveló detalles que las pruebas automáticas no cubrían. Se registran en `docs/AUDITORIA.md`; los tres quedaron **corregidos** el 3 de octubre (ver bloque 5):
 
-| # | Qué se observó | Dónde (bloque) | Riesgo |
-|---|---|---|---|
-| H1 | El campo **nombre** aceptó `12345678-5` (un RUT, sin letras) | 2.5 | Datos de baja calidad; el RUT podría quedar visible como nombre (R17) |
-| H2 | Se registró **"Cajon del Maipo"** sin tilde: si otro socio escribe "Cajón del Maipo", el sistema los considera **distintos** | 2.2 | Vuelve el problema P1: destinos repetidos con nombres distintos |
-| H3 | En el registro, el RUT inválido se avisa **al final**, después de pedir correo, teléfono y contraseña | 2.5 | Mala experiencia: hay que escribir todo de nuevo |
+| # | Qué se observó | Dónde (bloque) | Riesgo | Estado |
+|---|---|---|---|---|
+| H1 | El campo **nombre** aceptó `12345678-5` (un RUT, sin letras) | 2.5 | Datos de baja calidad; el RUT podría quedar visible como nombre (R17) | ✅ Corregido (5.1) |
+| H2 | Se registró **"Cajon del Maipo"** sin tilde: si otro socio escribe "Cajón del Maipo", el sistema los considera **distintos** | 2.2 | Vuelve el problema P1: destinos repetidos con nombres distintos | ✅ Corregido (5.2) |
+| H3 | En el registro, el RUT inválido se avisa **al final**, después de pedir correo, teléfono y contraseña | 2.5 | Mala experiencia: hay que escribir todo de nuevo | ✅ Corregido (5.1) |
 
 ## 4. Resumen de cobertura
 
@@ -254,4 +256,68 @@ Probar el sistema como lo usaría una persona real reveló detalles que las prue
 | RF-12 / RF-13 Reservar y total | 2.7 (error) · 2.8 (correcto) |
 | RF-14 Historial | 2.8 |
 | RF-06, RF-07, RF-08, RF-15, RNF-02, R15, R17 | Pruebas automáticas (bloque 1) |
+| H1, H2, H3 corregidos | Bloque 5 · pruebas automáticas H1 y H2 |
 
+## 5. Verificación de las correcciones — `python main.py` (3 de octubre de 2026)
+
+Indicador: **4.1.5.I.20** (evaluar la seguridad y corregir lo detectado). Se repitió a propósito lo que falló en la demostración del bloque 2.
+
+### 5.1 H3 y H1: el RUT se revisa al escribirlo y el nombre debe tener letras
+
+```
+PS ...\04_Codigo> python main.py
+============================================
+   VIAJES AVENTURA · Sistema de reservas
+============================================
+
+1. Iniciar sesión
+2. Registrarme como cliente
+0. Salir
+Opción: 2
+
+— Registro de cliente —
+Nombre completo: 12345678
+RUT (12345678-5): 11111111-2
+  ✗ RUT inválido: revise el dígito verificador (ejemplo: 12345678-5).
+RUT (12345678-5): 11111111-1
+Correo: prueba.h1@correo.cl
+Teléfono: 912345678
+Contraseña (mínimo 8 caracteres):
+Repita la contraseña:
+  ✗ El nombre solo puede tener letras y espacios (2 a 60 caracteres).
+```
+
+- **H3 corregido:** el RUT `11111111-2` se rechazó **en el mismo momento**, sin pedir el resto de los datos.
+- **H1 corregido:** el nombre `12345678` ya no se acepta y el cliente **no** quedó registrado.
+- La contraseña no se ve al escribirla (`getpass`, RNF-01).
+
+### 5.2 H2: el mismo destino con y sin tilde
+
+```
+Opción: 1
+Correo: Paulina@viajesaventura.cl
+Contraseña:
+  ✓ Bienvenido/a, Paulina Ovalle.
+
+=== Administrador ===
+Opción: 1
+Nombre: cajón del Maipo
+Zona: santiago
+Descripción: valle
+Duración en días: 2
+Costo base por persona: 99000
+  ✗ Ya existe un destino con ese nombre: Cajon del Maipo.
+
+=== Administrador ===
+Opción: 0
+  ✓ Sesión cerrada.
+
+1. Iniciar sesión
+2. Registrarme como cliente
+0. Salir
+Opción: 0
+Hasta pronto.
+```
+
+- **H2 corregido:** "cajón del Maipo" (con tilde y minúscula) se reconoció como el mismo destino "Cajon del Maipo" guardado el 2 de octubre. El problema P1 no vuelve a aparecer.
+- El correo escrito con mayúscula (`Paulina@...`) igual funcionó: el sistema lo pasa a minúsculas antes de buscarlo.
