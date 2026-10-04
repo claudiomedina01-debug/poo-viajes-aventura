@@ -1,6 +1,7 @@
 # Viajes Aventura — Sistema de destinos, paquetes y reservas
 
 Evaluación Sumativa 4 · Programación Orientada a Objeto Seguro (TI3021) · INACAP Valparaíso
+
 Autor: Claudio Medina M. · Trabajo individual · Octubre de 2026
 
 Sistema de terminal en Python para la agencia **Viajes Aventura**. Los socios administran destinos y arman paquetes de 2 a 5 destinos. El sistema calcula el precio, y los clientes se registran, reservan, ven su historial y cancelan. Todo queda guardado en SQLite, con contraseñas protegidas y datos personales ocultos.
