@@ -55,5 +55,5 @@ Indicador **4.1.2.I.8**: coherencia y trazabilidad entre requerimientos, proceso
 | ¿Los 2 procesos BPMN usan solo pasos que existen como RF? | ✅ Sí |
 | ¿Toda clase del diagrama participa en algún requerimiento? | ✅ 8 de 8 |
 | ¿Toda regla R1–R17 llega hasta una clase? | ✅ Sí (ver columna "Regla") |
-| ¿El código respeta el diagrama, miembro por miembro? | ✅ Sí. El diagrama se actualizó al programar (la v1 quedó en `diagramas/historico`, ver `ANALISIS_IA.md` #9). Diferencias menores que se conocen: `Destino.normalizar()` y `SistemaViajes._exigir_nombre_libre()` se agregaron en el Paso 6, y los métodos privados de apoyo (`_buscar_destino()`) no se dibujaron |
+| ¿El código respeta el diagrama, miembro por miembro? | ✅ Sí. El diagrama se actualizó al programar (la v1 quedó en `diagramas/historico`, ver `ANALISIS_IA.md` #9) y otra vez en el Paso 6, al agregar `Destino.normalizar()` y `SistemaViajes._exigir_nombre_libre()` (H2) |
 | ¿Todo requerimiento tiene evidencia de ejecución? | ✅ 15 de 15 RF y 12 de 12 RNF |
