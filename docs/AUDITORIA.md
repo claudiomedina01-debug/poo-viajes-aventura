@@ -105,7 +105,7 @@ Ningún sistema queda "100 % seguro". Estos riesgos se conocen y se aceptan para
 
 - Claude (Anthropic) apoyó la revisión del código y propuso las correcciones de H1, H2 y H3.
 - **Cada propuesta se comprobó:** primero con las pruebas automáticas en el PC del estudiante (15 de 15) y después repitiendo a mano los errores de la demostración original.
-- H4 se encontró al **revisar críticamente** el resultado de la corrección de H1, no porque la IA lo avisara antes.
+- H4 apareció al **revisar la demostración de verificación**: la corrección de H1 que propuso la IA rechazaba bien el nombre, pero no consideraba **cuándo** se avisa el error. Se registró como hallazgo en vez de darlo por cerrado.
 - El detalle de lo que se adoptó, modificó o descartó está en `docs/ANALISIS_IA.md`.
 
 ## 6. Conclusión
